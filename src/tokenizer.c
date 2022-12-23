@@ -119,13 +119,14 @@ size_t match_pattern_internal(const char* pattern, const char* token, size_t tok
       case ']': --open_square; ++start_pattern; break;
       case '%': {
         char type = *(start_pattern+1);
+        unsigned char uchar = *start_token;
         int lower = tolower(type);
         switch (lower) { // %w and other character classes defined here.
           case 0: return 0; break;
-          case 'a': matches = isalpha(*start_token) || type > 128; break;
-          case 'w': matches = isalnum(*start_token) || type > 128; break;
-          case 'l': matches = islower(*start_token) || type > 128; break;
-          case 'u': matches = isupper(*start_token) || type > 128; break;
+          case 'a': matches = isalpha(*start_token) || uchar > 128; break;
+          case 'w': matches = isalnum(*start_token) || uchar > 128; break;
+          case 'l': matches = islower(*start_token) || uchar > 128; break;
+          case 'u': matches = isupper(*start_token) || uchar > 128; break;
           case 'd': matches = isdigit(*start_token); break;
           case 'g': matches = isgraph(*start_token); break;
           case 'c': matches = iscntrl(*start_token); break;
