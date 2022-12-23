@@ -20,7 +20,12 @@ config.plugins.ctokenizer = common.merge({
       description = "Enable or disable the c-tokenizer.",
       path = "enabled",
       type = "toggle",
-      default = true
+      default = true,
+      on_apply = function()
+        for _, doc in ipairs(core.docs) do
+          doc.highlighter:reset()
+        end
+      end
     },
     {
       label = "Log Tokenization Time",
@@ -32,9 +37,7 @@ config.plugins.ctokenizer = common.merge({
   }
 }, config.plugins.ctokenizer)
 
-local tokenizer = {
-  syntaxes = {}
-}
+tokenizer.syntaxes = {}
 
 local total_time_tokenizing = 0.0
 
@@ -105,8 +108,10 @@ function Highlighter:start()
       coroutine.yield()
     end
     if config.plugins.ctokenizer.log_time then
+      local type = config.plugins.ctokenizer.enabled and "Native" or "Lua"
       core.log(
-        "Tokenization of %s lines took %ss from %s to %s",
+        "%s Tokenization of %s lines took %ss from %s to %s",
+        type,
         self.max_wanted_line - first_invalid,
         system.get_time() - start_time,
         first_invalid, self.max_wanted_line
