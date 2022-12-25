@@ -226,10 +226,10 @@ size_t match_pattern(struct pattern* pattern, const char* token, size_t length, 
       pcre2_match_data_free(md);
       return 0;
     }
-    for (int i = 0; i < rc*2 && i < MAX_TOKEN_MATCHES; i++)
-      matched_lengths[i] = ovector[i]+offset+1;
+    for (int i = 0; i < rc*2 && i < MAX_TOKEN_MATCHES; i+=2)
+      matched_lengths[i] = (ovector[i]+offset) + ovector[i+1];
     pcre2_match_data_free(md);
-    return rc*2;
+    return rc;
   }
   return match_pattern_internal(pattern->str, token, length, offset, matched_lengths, false);
 }
