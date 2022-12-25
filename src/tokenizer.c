@@ -303,6 +303,7 @@ static int tokenize_line(lua_State* L, struct syntax* self, struct syntax* initi
 
     if (info.subsyntax_idx) {
       size_t match_lengths = 0;
+      struct subsyntax_info pinfo = info;
       if (info.parent->rules[info.parent_rule_idx].patterns[2])
         match_lengths = match_pattern(info.parent->rules[info.parent_rule_idx].patterns[2], line, length, offset, matched_lengths);
       if (match_lengths == 0 && info.parent->rules[info.parent_rule_idx].patterns[1]) {
@@ -312,6 +313,12 @@ static int tokenize_line(lua_State* L, struct syntax* self, struct syntax* initi
           info = get_subsyntax_details(initial_target, *state);
           target = info.subsyntax;
         }
+      }
+      if (match_lengths > 0) {
+        offset += matched_lengths[0];
+        amount_matched += !quick ? emit_token(L, pinfo.parent, pinfo.parent->rules[pinfo.parent_rule_idx].symbol_types, offset, last_emission, line, amount_matched, &last_symbol) : 0;
+        last_emission = offset;
+        goto loop_start;
       }
     }
 
@@ -350,7 +357,7 @@ static int tokenize_line(lua_State* L, struct syntax* self, struct syntax* initi
     } else {
       size_t match_lengths = info.rule_idx && target->rules[info.rule_idx - 1].patterns[2] ? match_pattern(target->rules[info.rule_idx - 1].patterns[2], line, length, offset, matched_lengths) : 0;
       if (match_lengths) {
-        offset += matched_lengths[0] + 1;
+        offset += matched_lengths[0];
       } else {
         match_lengths = match_pattern(target->rules[info.rule_idx - 1].patterns[1], line, length, offset, matched_lengths);
         if (match_lengths > 0) {
